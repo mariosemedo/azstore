@@ -16,6 +16,7 @@ class AzureStorageException implements Exception {
   final String message;
   final int statusCode;
   final Map<String, String> headers;
+
   AzureStorageException(this.message, this.statusCode, this.headers);
 
   @override
@@ -329,7 +330,7 @@ class AzureStorage {
   Future<void> createContainer(String name, {int? timeout}) async {
     assert(name.trim().isNotEmpty);
     String path =
-        'https://${config[accountName]}.blob.core.windows.net/$name?restype=container';
+        'https://${config[accountName]}.blob.${config[endpointSuffix] ?? 'core.windows.net'}/$name?restype=container';
     if (timeout != null) path += '&timeout=$timeout';
     var request = http.Request('PUT', Uri.parse(path));
     // request.headers['x-ms-meta-name']='StorageSample';
@@ -346,7 +347,7 @@ class AzureStorage {
   Future<void> deleteContainer(String name, {int? timeout}) async {
     assert(name.trim().isNotEmpty);
     String path =
-        'https://${config[accountName]}.blob.core.windows.net/$name?restype=container';
+        'https://${config[accountName]}.blob.${config[endpointSuffix] ?? 'core.windows.net'}/$name?restype=container';
     if (timeout != null) path += '&timeout=$timeout';
     var request = http.Request('DELETE', Uri.parse(path));
     // request.headers['x-ms-meta-Name']='StorageSample';
@@ -450,7 +451,7 @@ class AzureStorage {
   Future<void> createTable(String tableName) async {
     String body = '{"TableName":"$tableName"}';
     String path =
-        'https://${config[accountName]}.table.core.windows.net/Tables';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/Tables';
     var request = http.Request('POST', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
     request.headers['Content-Type'] = 'application/json';
@@ -471,7 +472,7 @@ class AzureStorage {
   /// 'tableName' is  mandatory.
   Future<void> deleteTable(String tableName) async {
     String path =
-        'https://${config[accountName]}.table.core.windows.net/Tables(\'$tableName\')';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/Tables(\'$tableName\')';
     var request = http.Request('DELETE', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
     request.headers['Content-Type'] = 'application/json';
@@ -488,7 +489,7 @@ class AzureStorage {
   ///
   Future<List<String?>> getTables() async {
     String path =
-        'https://${config[accountName]}.table.core.windows.net/Tables';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/Tables';
     var request = http.Request('GET', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
     request.headers['Content-Type'] = 'application/json';
@@ -520,7 +521,7 @@ class AzureStorage {
   }) async {
     body = _resolveNodeBody(body, bodyMap);
     String path =
-        'https://${config[accountName]}.table.core.windows.net/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
     var request = http.Request('MERGE', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
     request.headers['Content-Type'] = 'application/json';
@@ -547,7 +548,7 @@ class AzureStorage {
   }) async {
     body = _resolveNodeBody(body, bodyMap);
     String path =
-        'https://${config[accountName]}.table.core.windows.net/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
     var request = http.Request('PUT', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
     request.headers['Content-Type'] = 'application/json';
@@ -573,7 +574,7 @@ class AzureStorage {
   }) async {
     String selectParams = _resolveNodeParams(fields);
     String path =
-        'https://${config[accountName]}.table.core.windows.net/$tableName(PartitionKey=\'$partitionKey\',RowKey=\'$rowKey\')?\$select=$selectParams';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/$tableName(PartitionKey=\'$partitionKey\',RowKey=\'$rowKey\')?\$select=$selectParams';
 //    print('get path: $path'); //DEBUG LOG
     var request = http.Request('GET', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
@@ -603,7 +604,7 @@ class AzureStorage {
   }) async {
     String selectParams = _resolveNodeParams(fields);
     String path =
-        'https://${config[accountName]}.table.core.windows.net/$tableName()?\$filter=$filter&\$select=$selectParams&\$top=$top';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/$tableName()?\$filter=$filter&\$select=$selectParams&\$top=$top';
 //    print('path to upload: $path'); //DEBUG LOG
     var request = http.Request('GET', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
@@ -634,7 +635,7 @@ class AzureStorage {
     required String rowKey,
   }) async {
     String path =
-        'https://${config[accountName]}.table.core.windows.net/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
+        'https://${config[accountName]}.table.${config[endpointSuffix] ?? 'core.windows.net'}/$tableName(PartitionKey=\'$partitionKey\', RowKey=\'$rowKey\')';
 //    print('delete path: $path');
     var request = http.Request('DELETE', Uri.parse(path));
     request.headers['Accept'] = 'application/json;odata=nometadata';
@@ -654,7 +655,7 @@ class AzureStorage {
   /// 'qName' is  mandatory.
   Future<void> createQueue(String qName) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName';
     var request = http.Request('PUT', Uri.parse(path));
     _sign(request);
     var res = await request.send();
@@ -671,7 +672,7 @@ class AzureStorage {
   /// 'qName' is  mandatory.
   Future<Map<String, String>> getQData(String qName) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName?comp=metadata';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName?comp=metadata';
     var request = http.Request('PUT', Uri.parse(path));
     _sign(request);
     var res = await request.send();
@@ -687,7 +688,7 @@ class AzureStorage {
   /// 'qName' is  mandatory.
   Future<void> deleteQueue(String qName) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName';
     var request = http.Request('DELETE', Uri.parse(path));
     _sign(request);
     var res = await request.send();
@@ -701,7 +702,7 @@ class AzureStorage {
   /// Get a list of all queues attached to the storage account
   Future<List<String>> getQList() async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net?comp=list';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}?comp=list';
     var request = http.Request('GET', Uri.parse(path));
     _sign4Q(request);
     var res = await request.send();
@@ -729,7 +730,7 @@ class AzureStorage {
     required String message,
   }) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages?visibilitytimeout=$vtimeout&messagettl=$messagettl';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages?visibilitytimeout=$vtimeout&messagettl=$messagettl';
     var request = http.Request('POST', Uri.parse(path));
     request.body = '''<QueueMessage>  
     <MessageText>$message</MessageText>  
@@ -759,7 +760,7 @@ class AzureStorage {
     int? timeout,
   }) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages?numofmessages=$numOfmessages';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages?numofmessages=$numOfmessages';
     if (visibilitytimeout != null) {
       path += '&visibilitytimeout=$visibilitytimeout';
     }
@@ -785,7 +786,7 @@ class AzureStorage {
     int numofmessages = 1,
   }) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages?numofmessages=$numofmessages&peekonly=true';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages?numofmessages=$numofmessages&peekonly=true';
     var request = http.Request('GET', Uri.parse(path));
     _sign(request);
     var res = await request.send();
@@ -810,7 +811,7 @@ class AzureStorage {
     required String popReceipt,
   }) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages/$messageId?popreceipt=$popReceipt';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages/$messageId?popreceipt=$popReceipt';
     var request = http.Request('DELETE', Uri.parse(path));
     _sign(request);
     var res = await request.send();
@@ -839,7 +840,7 @@ class AzureStorage {
   }) async {
     int time = vTimeout != null ? vTimeout.inSeconds : 0;
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages/$messageId?popreceipt=$popReceipt&visibilitytimeout=$time';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages/$messageId?popreceipt=$popReceipt&visibilitytimeout=$time';
     var request = http.Request('PUT', Uri.parse(path));
     request.body = '''<QueueMessage>  
           <MessageText>$message</MessageText>  
@@ -859,7 +860,7 @@ class AzureStorage {
   ///
   Future<void> clearQmessages(String qName) async {
     String path =
-        'https://${config[accountName]}.queue.core.windows.net/$qName/messages';
+        'https://${config[accountName]}.queue.${config[endpointSuffix] ?? 'core.windows.net'}/$qName/messages';
     var request = http.Request('DELETE', Uri.parse(path));
     _sign(request);
     var res = await request.send();
