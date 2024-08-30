@@ -5,7 +5,7 @@ import 'package:azstore/azstore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -13,7 +13,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> filterTable() async {
     var storage = AzureStorage.parse(_connectionString);
     debugPrint('working on results...');
-    List<String> result = await storage.filterTableRows(
+    List result = await storage.filterTableRows(
         tableName: 'profiles',
         filter: 'Age%20lt%2024',
         fields: ['Age', 'CustomerSince', 'PartitionKey', 'RowKey'],
@@ -210,7 +210,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       debugPrint('exception: $e');
       // showErrorDialog(context, '$e');//Optional prompt
-
     }
   }
 
@@ -295,7 +294,6 @@ class _MyHomePageState extends State<MyHomePage> {
         debugPrint('message $res');
       }
       showInfoDialog(context, 'Success'); //Optional prompt
-
     } catch (e) {
       debugPrint('Q get messages exception $e');
       showErrorDialog(context, e.toString()); //Optional prompt
@@ -349,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> {
   uploadBlobImage() async {
     try {
       showProgress(true);
-      PickedFile tempFile = await _picker.getImage(source: ImageSource.gallery);
+      XFile? tempFile = await _picker.pickImage(source: ImageSource.gallery);
       assert(tempFile != null);
       String compressedPath = await compressImage(
           File(tempFile != null ? tempFile.path : '').absolute.path);
@@ -378,9 +376,9 @@ class _MyHomePageState extends State<MyHomePage> {
     path += '/$fileId.jpg';
     File newFile = File(path);
     await newFile.create();
-    File compressionFile = await FlutterImageCompress.compressAndGetFile(
+    File compressionFile = (await FlutterImageCompress.compressAndGetFile(
         imagePath, path,
-        quality: 25, rotate: 0);
+        quality: 25, rotate: 0)) as File;
     return compressionFile.path;
   }
 
@@ -397,12 +395,13 @@ class _MyHomePageState extends State<MyHomePage> {
         text: errorText);
   }
 
-  void showCustomDialog(
-      {BuildContext context,
-      IconData icon,
-      Color iconColor,
-      String text,
-      List buttonList}) {
+  void showCustomDialog({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+    List? buttonList,
+  }) {
     List<Widget> butList = [];
     if (buttonList != null && buttonList.isNotEmpty) {
       for (var arr in buttonList) {
@@ -487,13 +486,17 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class MyButton extends StatelessWidget {
-  const MyButton(
-      {Key key, this.buttonColor, this.text, this.textColor, this.onPressed})
-      : super(key: key);
-  final Color buttonColor;
+  const MyButton({
+    Key? key,
+    this.buttonColor,
+    required this.text,
+    this.textColor,
+    required this.onPressed,
+  }) : super(key: key);
+  final Color? buttonColor;
   final String text;
   final Function() onPressed;
-  final Color textColor;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
