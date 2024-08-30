@@ -38,22 +38,25 @@ class AzureQMessage {
     var xml = XmlDocument.parse(xmlObj);
     // if (xml == null) return;
     messageId = xml.getElement('QueueMessage')!.getElement('MessageId') != null
-        ? xml.getElement('QueueMessage')!.getElement('MessageId')!.text
+        ? xml.getElement('QueueMessage')!.getElement('MessageId')!.value
         : '';
 
     insertionTime =
         xml.getElement('QueueMessage')!.getElement('InsertionTime') != null
-            ? xml.getElement('QueueMessage')!.getElement('InsertionTime')!.text
+            ? xml.getElement('QueueMessage')!.getElement('InsertionTime')!.value
             : '';
 
     expirationTime =
         xml.getElement('QueueMessage')!.getElement('ExpirationTime') != null
-            ? xml.getElement('QueueMessage')!.getElement('ExpirationTime')!.text
+            ? xml
+                .getElement('QueueMessage')!
+                .getElement('ExpirationTime')!
+                .value
             : '';
 
     popReceipt =
         xml.getElement('QueueMessage')!.getElement('PopReceipt') != null
-            ? xml.getElement('QueueMessage')!.getElement('PopReceipt')!.text
+            ? xml.getElement('QueueMessage')!.getElement('PopReceipt')!.value
             : '';
 
     timeNextVisible =
@@ -61,15 +64,15 @@ class AzureQMessage {
             ? xml
                 .getElement('QueueMessage')!
                 .getElement('TimeNextVisible')!
-                .text
+                .value
             : '';
     dequeueCount =
         xml.getElement('QueueMessage')!.getElement('DequeueCount') != null
-            ? xml.getElement('QueueMessage')!.getElement('DequeueCount')!.text
+            ? xml.getElement('QueueMessage')!.getElement('DequeueCount')!.value
             : '';
     messageText =
         xml.getElement('QueueMessage')!.getElement('MessageText') != null
-            ? xml.getElement('QueueMessage')!.getElement('MessageText')!.text
+            ? xml.getElement('QueueMessage')!.getElement('MessageText')!.value
             : '';
   }
 
@@ -167,8 +170,11 @@ class AzureStorage {
     var xx = XmlDocument.parse(message);
     for (var qNode
         in xx.getElement('EnumerationResults')!.findAllElements('Name')) {
-      String name = qNode.text;
-      tabList.add(name);
+      String? name = qNode.value;
+
+      if (name != null) {
+        tabList.add(name);
+      }
     }
     return tabList;
   }
